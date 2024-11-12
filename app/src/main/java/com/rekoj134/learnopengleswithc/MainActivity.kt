@@ -15,22 +15,17 @@ class MainActivity : AppCompatActivity() {
 
         val activityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
         val configurationInfo = activityManager.deviceConfigurationInfo
-
-        val supportsEs2 =
-            configurationInfo.reqGlEsVersion >= 0x20000
+        val supportsEs2 = configurationInfo.reqGlEsVersion >= 0x30000
 
         if (supportsEs2) {
             glSurfaceView = GLSurfaceView(this)
-
-            glSurfaceView?.setEGLConfigChooser(8, 8, 8, 8, 16, 0)
-
             glSurfaceView?.setEGLContextClientVersion(2)
             glSurfaceView?.setRenderer(RendererWrapper())
             rendererSet = true
             setContentView(glSurfaceView)
         } else {
             Toast.makeText(
-                this, "This device does not support OpenGL ES 2.0.",
+                this, "This device does not support OpenGL ES 3.0.",
                 Toast.LENGTH_LONG
             ).show()
             return

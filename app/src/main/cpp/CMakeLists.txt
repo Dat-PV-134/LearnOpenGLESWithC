@@ -35,4 +35,4 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         # List libraries link to the target library
         android
         log
-        GLESv2)
+        GLESv3)
