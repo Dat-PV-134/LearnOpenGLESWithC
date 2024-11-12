@@ -6,18 +6,18 @@ import javax.microedition.khronos.opengles.GL10
 
 class RendererWrapper : Renderer {
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        on_surface_created()
+        onSurfaceCreatedNative()
     }
 
     override fun onSurfaceChanged(gl: GL10, width: Int, height: Int) {
-        on_surface_changed()
+        onSurfaceChangedNative()
     }
 
     override fun onDrawFrame(gl: GL10) {
-        on_draw_frame()
+        onDrawFrameNative()
     }
 
-    private external fun on_surface_created()
-    private external fun on_surface_changed()
-    private external fun on_draw_frame()
+    private external fun onSurfaceCreatedNative()
+    private external fun onSurfaceChangedNative()
+    private external fun onDrawFrameNative()
 }
