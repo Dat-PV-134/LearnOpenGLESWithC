@@ -93,6 +93,7 @@
 //    glUseProgram(shaderProgram);
 //    glBindVertexArray(VAO);
 //    glDrawArrays(GL_TRIANGLES, 0, 3);
+//    glBindVertexArray(0);
 //}
 //
 //JNIEXPORT void JNICALL

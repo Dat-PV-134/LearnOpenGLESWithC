@@ -14,19 +14,31 @@ const char *vertexShaderSource = "#version 300 es\n"
 
 const char *fragmentShaderSource = "#version 300 es\n"
                                    "precision mediump float;\n"
+                                   "uniform vec3 triangleColor;\n"
                                    "out vec4 FragColor;\n"
                                    "void main()\n"
                                    "{\n"
-                                   "    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+                                   "    FragColor = vec4(triangleColor.x, triangleColor.y, triangleColor.z, 1.0f);\n"
                                    "}\0";
 
+//float vertices[] = {
+//        -0.5f, 0.5f, 0.0f,
+//        0.5f, 0.5f, 0.0f,
+//        0.0f, -0.5f, 0.0f
+//};
+
 float vertices[] = {
-        -0.5f, 0.5f, 0.0f,
-        0.5f, 0.5f, 0.0f,
-        0.0f, -0.5f, 0.0f
+        0.5f,  0.5f, 0.0f,  // top right
+        0.5f, -0.5f, 0.0f,  // bottom right
+        -0.5f, -0.5f, 0.0f,  // bottom left
+        -0.5f,  0.5f, 0.0f   // top left
+};
+unsigned int indices[] = {  // note that we start from 0!
+        0, 1, 3,   // first triangle
+        1, 2, 3    // second triangle
 };
 
-unsigned int VBO, VAO, shaderProgram, vertexShader, fragmentShader;
+unsigned int VBO, VAO, EBO, shaderProgram, vertexShader, fragmentShader;
 
 void on_surface_created() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -71,10 +83,13 @@ void on_surface_created() {
     // Create and bind the vertex array object and buffer
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // Define the vertex attribute pointer
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -93,8 +108,11 @@ void on_draw_frame() {
 
     // Draw the triangle
     glUseProgram(shaderProgram);
+    GLint uniColor = glGetUniformLocation(shaderProgram, "triangleColor");
+    glUniform3f(uniColor, 1.0f, 0.0f, 0.0f);
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 }
 
 JNIEXPORT void JNICALL
