@@ -1,49 +1,25 @@
 package com.rekoj134.learnopengleswithc
 
-import android.app.ActivityManager
-import android.opengl.GLSurfaceView
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.rekoj134.learnopengleswithc.databinding.ActivityHelloTriangleBinding
+import com.rekoj134.learnopengleswithc.hello_triangle.HelloTriangleActivity
 
 class MainActivity : AppCompatActivity() {
-    private var glSurfaceView: GLSurfaceView? = null
-    private var rendererSet = false
+    private lateinit var binding: ActivityHelloTriangleBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val activityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        val configurationInfo = activityManager.deviceConfigurationInfo
-        val supportsEs2 = configurationInfo.reqGlEsVersion >= 0x30000
-
-        if (supportsEs2) {
-            glSurfaceView = GLSurfaceView(this)
-            glSurfaceView?.setEGLContextClientVersion(2)
-            glSurfaceView?.setRenderer(RendererWrapper())
-            rendererSet = true
-            setContentView(glSurfaceView)
-        } else {
-            Toast.makeText(
-                this, "This device does not support OpenGL ES 3.0.",
-                Toast.LENGTH_LONG
-            ).show()
-            return
-        }
+        binding = ActivityHelloTriangleBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        handleEvent()
     }
 
-    override fun onPause() {
-        if (rendererSet) {
-            glSurfaceView?.onPause()
+    private fun handleEvent() {
+        binding.btnHelloTriangle.setOnClickListener {
+            startActivity(Intent(this@MainActivity, HelloTriangleActivity::class.java))
         }
-        super.onPause()
-    }
-
-    override fun onResume() {
-        if (rendererSet) {
-            glSurfaceView?.onResume()
-        }
-        super.onResume()
     }
 
     companion object {

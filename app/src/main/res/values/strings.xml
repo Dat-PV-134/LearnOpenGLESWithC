@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Learn OpenGL ES With C</string>
+    <string name="hello_triangle">Hello Triangle</string>
 </resources>
