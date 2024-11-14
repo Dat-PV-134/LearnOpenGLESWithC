@@ -26,5 +26,20 @@
             android:textColor="@color/white"
             android:textSize="18sp"
             android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/btnZipperLock"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="46dp"
+            android:layout_marginTop="36dp"
+            android:background="#BD815F"
+            android:includeFontPadding="false"
+            android:paddingVertical="16dp"
+            android:text="@string/zipper_lock"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
     </LinearLayout>
 </ScrollView>

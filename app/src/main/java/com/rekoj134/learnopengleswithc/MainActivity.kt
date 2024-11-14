@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.rekoj134.learnopengleswithc.databinding.ActivityHelloTriangleBinding
 import com.rekoj134.learnopengleswithc.hello_triangle.HelloTriangleActivity
+import com.rekoj134.learnopengleswithc.zipper_lock.ZipperLockActivity
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHelloTriangleBinding
@@ -19,6 +20,10 @@ class MainActivity : AppCompatActivity() {
     private fun handleEvent() {
         binding.btnHelloTriangle.setOnClickListener {
             startActivity(Intent(this@MainActivity, HelloTriangleActivity::class.java))
+        }
+
+        binding.btnZipperLock.setOnClickListener {
+            startActivity(Intent(this@MainActivity, ZipperLockActivity::class.java))
         }
     }
 

@@ -30,7 +30,11 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
 
         # Hello Triangle
         hello_triangle/hello_triangle.h
-        hello_triangle/hello_triangle.c)
+        hello_triangle/hello_triangle.c
+
+        # zipper lock
+        zipper_lock/zipper_lock.h
+        zipper_lock/zipper_lock.c)
 
 # Specifies libraries CMake should link to your target library. You
 # can link libraries from various origins, such as libraries defined in this

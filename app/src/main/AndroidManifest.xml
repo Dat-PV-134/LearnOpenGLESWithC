@@ -17,6 +17,9 @@
         android:theme="@style/Theme.LearnOpenGLESWithC"
         tools:targetApi="31">
         <activity
+            android:name=".zipper_lock.ZipperLockActivity"
+            android:exported="false" />
+        <activity
             android:name=".hello_triangle.HelloTriangleActivity"
             android:exported="false" />
         <activity
