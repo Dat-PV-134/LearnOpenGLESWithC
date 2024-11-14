@@ -40,6 +40,8 @@ unsigned int indices[] = {  // note that we start from 0!
 
 unsigned int VBO, VAO, EBO, shaderProgram, vertexShader, fragmentShader;
 
+clock_t t_start;
+
 void on_surface_created() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -108,9 +110,14 @@ void on_draw_frame() {
 
     // Draw the triangle
     glUseProgram(shaderProgram);
-    GLint uniColor = glGetUniformLocation(shaderProgram, "triangleColor");
-    glUniform3f(uniColor, 1.0f, 0.0f, 0.0f);
     glBindVertexArray(VAO);
+
+    GLint uniColor = glGetUniformLocation(shaderProgram, "triangleColor");
+    clock_t t_now = clock();  // Get the current time
+    float time = ((float)(t_now - t_start)) / 100000;  // Convert clock ticks to seconds
+    // Use the elapsed time to calculate the color (sinusoidal wave for red)
+    glUniform3f(uniColor, (sin(time * 4.0f) + 1.0f) / 2.0f, 0.0f, 0.0f);
+
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
