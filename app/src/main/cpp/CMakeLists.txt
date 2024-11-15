@@ -29,6 +29,7 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         native_lib.c
 
         # base
+        stb_image.h
         shader.h
         shader.c
 

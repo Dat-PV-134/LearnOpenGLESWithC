@@ -1,13 +1,12 @@
 // Created by DatPV on 11/14/2024.
 //
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #include "shader.h"
 #include <android/log.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <jni.h>
-
-#define LOG_TAG "OpenGL"
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 static AAssetManager* asset_manager = NULL;
 
@@ -112,6 +111,45 @@ void shader_set_int(Shader* shader, const char* name, int value) {
 // Function to set a float uniform in the shader
 void shader_set_float(Shader* shader, const char* name, float value) {
     glUniform1f(glGetUniformLocation(shader->ID, name), value);
+}
+
+// Function to load the asset (image file) from assets
+unsigned char* loadAssetTexture(const char* filename, int* width, int* height, int* nrChannels) {
+    // Open the asset file
+    AAsset* asset = AAssetManager_open(asset_manager, filename, AASSET_MODE_STREAMING);
+    if (!asset) {
+        LOGE("Failed to open asset: %s", filename);
+        return NULL;
+    }
+
+    // Get the length of the asset (file size)
+    off_t fileLength = AAsset_getLength(asset);
+    unsigned char* buffer = (unsigned char*)malloc(fileLength);
+    if (buffer == NULL) {
+        LOGE("Failed to allocate memory for asset data");
+        AAsset_close(asset);
+        return NULL;
+    }
+
+    // Read the content of the asset into the buffer
+    AAsset_read(asset, buffer, fileLength);
+
+    // Close the asset
+    AAsset_close(asset);
+
+    // Use stb_image to load image data from memory and get width, height, and channels
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* imageData = stbi_load_from_memory(buffer, fileLength, width, height, nrChannels, 0);
+    if (!imageData) {
+        LOGE("Failed to load image from memory");
+        free(buffer);  // Free the buffer as stb_image failed to load the image
+        return NULL;
+    }
+
+    // Free the buffer as stb_image has its own internal copy of the image data
+    free(buffer);
+
+    return imageData;
 }
 
 JNIEXPORT void JNICALL

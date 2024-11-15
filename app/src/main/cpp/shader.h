@@ -3,6 +3,8 @@
 //
 #ifndef LEARN_OPENGL_ES_WITH_C_SHADER_H
 #define LEARN_OPENGL_ES_WITH_C_SHADER_H
+#define LOG_TAG "OpenGL"
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 #include <GLES3/gl3.h>  // Include GLEW to get all the required OpenGL headers
 #include <stdbool.h>   // For using the 'bool' type
@@ -21,5 +23,6 @@ void shader_use(Shader* shader);
 void shader_set_bool(Shader* shader, const char* name, bool value);
 void shader_set_int(Shader* shader, const char* name, int value);
 void shader_set_float(Shader* shader, const char* name, float value);
+unsigned char* loadAssetTexture(const char* filename, int* width, int* height, int* nrChannels);
 
 #endif //LEARN_OPENGL_ES_WITH_C_SHADER_H
