@@ -29,12 +29,16 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         native_lib.c
 
         # base
-        hello_triangle/shader.h
-        hello_triangle/shader.c
+        shader.h
+        shader.c
 
         # Hello Triangle
         hello_triangle/hello_triangle.h
         hello_triangle/hello_triangle.c
+
+        # Hello Texture
+        hello_texture/hello_texture.h
+        hello_texture/hello_texture.c
 
         # zipper lock
         zipper_lock/zipper_lock.h

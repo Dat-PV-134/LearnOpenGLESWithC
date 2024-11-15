@@ -40,7 +40,7 @@ unsigned int indicesZipper[] = {  // note that we start from 0!
 
 unsigned int VBOZipper, VAOZipper, EBOZipper, shaderProgramZipper, vertexShaderZipper, fragmentShaderZipper;
 
-void on_surface_created_zipper() {
+static void on_surface_created_zipper() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     // Compile the vertex shader
@@ -99,11 +99,11 @@ void on_surface_created_zipper() {
     glBindVertexArray(0);
 }
 
-void on_surface_changed_zipper() {
+static void on_surface_changed_zipper() {
 
 }
 
-void on_draw_frame_zipper() {
+static void on_draw_frame_zipper() {
     glClear(GL_COLOR_BUFFER_BIT);  // Clear the screen
 
     // Draw the triangle

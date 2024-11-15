@@ -1,30 +1,29 @@
 //
-// Created by DatPV on 11/13/2024.
+// Created by Admin on 11/15/2024.
 //
+#include "hello_texture.h"
 #include "../shader.h"
-#include "hello_triangle.h"
 
-// Vertices and indices for the triangle (same as before)
-float vertices[] = {
+static float vertices[] = {
         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f,  // top right
         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom right
         -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,// bottom left
         -0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 1.0f, // top left
 };
-unsigned int indices[] = {
+
+static unsigned int indices[] = {
         0, 1, 3,   // first triangle
         1, 2, 3    // second triangle
 };
 
-unsigned int VBO, VAO, EBO;
-Shader shader;  // Shader object to hold the shader program ID
+static unsigned int VBO, VAO, EBO;
+static Shader shader;  // Shader object to hold the shader program ID
 
-// Modify on_surface_created() to use shader_create()
 static void on_surface_created() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     // Use the shader_create function to create and compile the shader program
-    shader = shader_create("shader/vertex_shader.glsl", "shader/fragment_shader.glsl");
+    shader = shader_create("shader/vertex_shader_with_texture.glsl", "shader/fragment_shader_with_texture.glsl");
     if (shader.ID == 0) {
         __android_log_print(ANDROID_LOG_ERROR, "OpenGL", "Shader creation failed");
         return;
@@ -52,7 +51,7 @@ static void on_surface_created() {
 }
 
 static void on_surface_changed() {
-    // This function can remain empty for now as it's not used in your current code.
+
 }
 
 static void on_draw_frame() {
@@ -68,17 +67,19 @@ static void on_draw_frame() {
 }
 
 JNIEXPORT void JNICALL
-Java_com_rekoj134_learnopengleswithc_hello_1triangle_HelloTriangleRenderer_onSurfaceCreatedNativeTriangle(
+Java_com_rekoj134_learnopengleswithc_hello_1texture_HelloTextureRenderer_onSurfaceCreatedNativeTexture(
         JNIEnv *env, jobject thiz) {
-    on_surface_created();
+   on_surface_created();
 }
 
 JNIEXPORT void JNICALL
-Java_com_rekoj134_learnopengleswithc_hello_1triangle_HelloTriangleRenderer_onSurfaceChangedNativeTriangle(JNIEnv *env, jobject thiz) {
+Java_com_rekoj134_learnopengleswithc_hello_1texture_HelloTextureRenderer_onSurfaceChangedNativeTexture(
+        JNIEnv *env, jobject thiz) {
     on_surface_changed();
 }
 
 JNIEXPORT void JNICALL
-Java_com_rekoj134_learnopengleswithc_hello_1triangle_HelloTriangleRenderer_onDrawFrameNativeTriangle(JNIEnv *env, jobject thiz) {
+Java_com_rekoj134_learnopengleswithc_hello_1texture_HelloTextureRenderer_onDrawFrameNativeTexture(
+        JNIEnv *env, jobject thiz) {
     on_draw_frame();
 }

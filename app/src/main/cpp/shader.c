@@ -115,8 +115,7 @@ void shader_set_float(Shader* shader, const char* name, float value) {
 }
 
 JNIEXPORT void JNICALL
-Java_com_rekoj134_learnopengleswithc_hello_1triangle_HelloTriangleActivity_initShaderManager(
-        JNIEnv *env, jobject thiz, jobject context) {
+Java_com_rekoj134_learnopengleswithc_MainActivity_00024Companion_initShaderManager(JNIEnv *env, jobject thiz, jobject context) {
     jclass contextClass = (*env)->GetObjectClass(env, context);  // Use C syntax for JNI
     jmethodID getAssetsMethod = (*env)->GetMethodID(env, contextClass, "getAssets", "()Landroid/content/res/AssetManager;");
     jobject assetManagerObject = (*env)->CallObjectMethod(env, context, getAssetsMethod);

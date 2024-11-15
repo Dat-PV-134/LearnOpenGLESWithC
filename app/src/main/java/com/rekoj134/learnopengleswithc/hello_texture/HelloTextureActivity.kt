@@ -1,4 +1,4 @@
-package com.rekoj134.learnopengleswithc.hello_triangle
+package com.rekoj134.learnopengleswithc.hello_texture
 
 import android.app.ActivityManager
 import android.content.Context
@@ -7,9 +7,9 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.rekoj134.learnopengleswithc.MainActivity.Companion.initShaderManager
+import com.rekoj134.learnopengleswithc.hello_triangle.HelloTriangleRenderer
 
-
-class HelloTriangleActivity : AppCompatActivity() {
+class HelloTextureActivity : AppCompatActivity() {
     private var glSurfaceView: GLSurfaceView? = null
     private var rendererSet = false
 
@@ -21,10 +21,10 @@ class HelloTriangleActivity : AppCompatActivity() {
         val supportsEs2 = configurationInfo.reqGlEsVersion >= 0x30000
 
         if (supportsEs2) {
-            initShaderManager(this@HelloTriangleActivity)
+            initShaderManager(this@HelloTextureActivity)
             glSurfaceView = GLSurfaceView(this)
             glSurfaceView?.setEGLContextClientVersion(2)
-            glSurfaceView?.setRenderer(HelloTriangleRenderer())
+            glSurfaceView?.setRenderer(HelloTextureRenderer())
             rendererSet = true
             setContentView(glSurfaceView)
         } else {
