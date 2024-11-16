@@ -10,12 +10,30 @@ float verticesZipper[] = {
         1.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f,  1.0f, 1.0f,// top right
         1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,// bottom right
         -1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f,// bottom left
-        -1.0f,  1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f// top left
+        -1.0f,  1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f,// top left
+
+        // right line
+        0.2f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f,  1.0f, 1.0f,// top right
+        0.2f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,// bottom right
+        0.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f,// bottom left
+        0.0f,  1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f,// top left
+
+        // left line
+        0.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f,// bottom left
+        0.0f,  1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f,// top left
+        -0.2f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f,  1.0f, 1.0f,// top right
+        -0.2f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,// bottom right
 };
 
 unsigned int indicesZipper[] = {  // note that we start from 0!
-        0, 1, 3,   // first triangle
-        1, 2, 3    // second triangle
+        0, 1, 3,
+        1, 2, 3,
+
+        4, 5, 6,
+        5, 6, 7,
+
+        8, 9, 10,
+        9, 10, 11,
 };
 
 static Shader shader;  // Shader object to hold the shader program ID
@@ -87,7 +105,7 @@ static void on_draw_frame_zipper() {
     // Draw the triangle
     shader_use(&shader);
     glBindVertexArray(VAOZipper);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 
