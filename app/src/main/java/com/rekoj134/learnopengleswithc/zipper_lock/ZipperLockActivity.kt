@@ -5,6 +5,7 @@ import android.opengl.GLSurfaceView
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.rekoj134.learnopengleswithc.MainActivity.Companion.initShaderManager
 
 class ZipperLockActivity : AppCompatActivity() {
     private var glSurfaceView: GLSurfaceView? = null
@@ -18,6 +19,7 @@ class ZipperLockActivity : AppCompatActivity() {
         val supportsEs2 = configurationInfo.reqGlEsVersion >= 0x30000
 
         if (supportsEs2) {
+            initShaderManager(this@ZipperLockActivity)
             glSurfaceView = GLSurfaceView(this)
             glSurfaceView?.setEGLContextClientVersion(2)
             glSurfaceView?.setRenderer(ZipperLockRenderer())

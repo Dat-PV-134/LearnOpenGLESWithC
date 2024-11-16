@@ -4,81 +4,33 @@
 #include <jni.h>
 #include <android/log.h> // For logging errors
 #include "zipper_lock.h"
-
-const char *vertexShaderSourceZipper = "#version 300 es\n"
-                                 "in vec3 aPos;\n"
-                                 "void main()\n"
-                                 "{\n"
-                                 "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-                                 "}\0";
-
-const char *fragmentShaderSourceZipper = "#version 300 es\n"
-                                   "precision mediump float;\n"
-                                   "uniform vec3 triangleColor;\n"
-                                   "out vec4 FragColor;\n"
-                                   "void main()\n"
-                                   "{\n"
-                                   "    FragColor = vec4(triangleColor.x, triangleColor.y, triangleColor.z, 1.0f);\n"
-                                   "}\0";
-
-//float verticesZipper[] = {
-//        -0.5f, 0.5f, 0.0f,
-//        0.5f, 0.5f, 0.0f,
-//        0.0f, -0.5f, 0.0f
-//};
+#include "../shader.h"
 
 float verticesZipper[] = {
-        0.5f,  0.5f, 0.0f,  // top right
-        0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f,  // bottom left
-        -0.5f,  0.5f, 0.0f   // top left
+        1.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f,  1.0f, 1.0f,// top right
+        1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,// bottom right
+        -1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f,// bottom left
+        -1.0f,  1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f// top left
 };
+
 unsigned int indicesZipper[] = {  // note that we start from 0!
         0, 1, 3,   // first triangle
         1, 2, 3    // second triangle
 };
 
-unsigned int VBOZipper, VAOZipper, EBOZipper, shaderProgramZipper, vertexShaderZipper, fragmentShaderZipper;
+static Shader shader;  // Shader object to hold the shader program ID
+unsigned int VBOZipper, VAOZipper, EBOZipper;
+static unsigned int texture;
+static int textureWidth, textureHeight;
 
 static void on_surface_created_zipper() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    // Compile the vertex shader
-    vertexShaderZipper = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShaderZipper, 1, &vertexShaderSourceZipper, NULL);
-    glCompileShader(vertexShaderZipper);
-    int success;
-    glGetShaderiv(vertexShaderZipper, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        char infoLog[512];
-        glGetShaderInfoLog(vertexShaderZipper, 512, NULL, infoLog);
-        __android_log_print(ANDROID_LOG_ERROR, "OpenGL", "Vertex shader compilation failed: %s", infoLog);
+    shader = shader_create("shader/vertex_shader_zipper_lock.glsl", "shader/fragment_shader_zipper_lock.glsl");
+    if (shader.ID == 0) {
+        __android_log_print(ANDROID_LOG_ERROR, "OpenGL", "Shader creation failed");
+        return;
     }
-
-    // Compile the fragment shader
-    fragmentShaderZipper = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShaderZipper, 1, &fragmentShaderSourceZipper, NULL);
-    glCompileShader(fragmentShaderZipper);
-    glGetShaderiv(fragmentShaderZipper, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        char infoLog[512];
-        glGetShaderInfoLog(fragmentShaderZipper, 512, NULL, infoLog);
-        __android_log_print(ANDROID_LOG_ERROR, "OpenGL", "Fragment shader compilation failed: %s", infoLog);
-    }
-
-    // Link shaders to the program
-    shaderProgramZipper = glCreateProgram();
-    glAttachShader(shaderProgramZipper, vertexShaderZipper);
-    glAttachShader(shaderProgramZipper, fragmentShaderZipper);
-    glLinkProgram(shaderProgramZipper);
-    glGetProgramiv(shaderProgramZipper, GL_LINK_STATUS, &success);
-    if (!success) {
-        char infoLog[512];
-        glGetProgramInfoLog(shaderProgramZipper, 512, NULL, infoLog);
-        __android_log_print(ANDROID_LOG_ERROR, "OpenGL", "Shader program linking failed: %s", infoLog);
-    }
-    glDeleteShader(vertexShaderZipper);
-    glDeleteShader(fragmentShaderZipper);
 
     // Create and bind the vertex array object and buffer
     glGenVertexArrays(1, &VAOZipper);
@@ -92,14 +44,40 @@ static void on_surface_created_zipper() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicesZipper), indicesZipper, GL_STATIC_DRAW);
 
     // Define the vertex attribute pointer
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+    glGenTextures(1, &texture);
+    glActiveTexture(GL_TEXTURE0);           // Choose texture unit
+    glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load image, create texture and generate mipmaps
+    int nrChannels;
+    unsigned char *data = loadAssetTexture("texture/zipper_background.png", &textureWidth, &textureHeight, &nrChannels);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        LOGE("Failed to load texture");
+    }
 }
 
-static void on_surface_changed_zipper() {
+static void on_surface_changed_zipper(int screenWidth, int screenHeight) {
 
 }
 
@@ -107,12 +85,8 @@ static void on_draw_frame_zipper() {
     glClear(GL_COLOR_BUFFER_BIT);  // Clear the screen
 
     // Draw the triangle
-    glUseProgram(shaderProgramZipper);
+    shader_use(&shader);
     glBindVertexArray(VAOZipper);
-
-    GLint uniColor = glGetUniformLocation(shaderProgramZipper, "triangleColor");
-    glUniform3f(uniColor, 1.0f, 0.5f, 0.2f);
-
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
@@ -125,8 +99,8 @@ Java_com_rekoj134_learnopengleswithc_zipper_1lock_ZipperLockRenderer_onSurfaceCr
 
 JNIEXPORT void JNICALL
 Java_com_rekoj134_learnopengleswithc_zipper_1lock_ZipperLockRenderer_onSurfaceChangedNativeZipperLock(
-        JNIEnv *env, jobject thiz) {
-    on_surface_changed_zipper();
+        JNIEnv *env, jobject thiz, jint width, jint height) {
+    on_surface_changed_zipper(width, height);
 }
 
 JNIEXPORT void JNICALL

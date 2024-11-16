@@ -138,10 +138,10 @@ unsigned char* loadAssetTexture(const char* filename, int* width, int* height, i
     AAsset_close(asset);
 
     // Use stb_image to load image data from memory and get width, height, and channels
-    stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(true);  // Ensure vertical flip for OpenGL compatibility
     unsigned char* imageData = stbi_load_from_memory(buffer, fileLength, width, height, nrChannels, 0);
     if (!imageData) {
-        LOGE("Failed to load image from memory");
+        LOGE("Failed to load image from memory. stbi_error: %s", stbi_failure_reason());
         free(buffer);  // Free the buffer as stb_image failed to load the image
         return NULL;
     }

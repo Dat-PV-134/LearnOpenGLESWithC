@@ -10,7 +10,7 @@ class ZipperLockRenderer: Renderer {
     }
 
     override fun onSurfaceChanged(gl: GL10, width: Int, height: Int) {
-        onSurfaceChangedNativeZipperLock()
+        onSurfaceChangedNativeZipperLock(width, height)
     }
 
     override fun onDrawFrame(gl: GL10) {
@@ -18,6 +18,6 @@ class ZipperLockRenderer: Renderer {
     }
 
     private external fun onSurfaceCreatedNativeZipperLock()
-    private external fun onSurfaceChangedNativeZipperLock()
+    private external fun onSurfaceChangedNativeZipperLock(width: Int, height: Int)
     private external fun onDrawFrameNativeZipperLock()
 }
