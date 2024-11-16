@@ -15,12 +15,12 @@ float verticesZipper[] = {
         // right line
         0.2f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f,  1.0f, 1.0f,// top right
         0.2f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,// bottom right
-        0.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f,// bottom left
-        0.0f,  1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f,// top left
+        0.0f, 1.0f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f,// bottom left
+        0.0f,  -1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f,// top left
 
         // left line
-        0.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f,// bottom left
-        0.0f,  1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f,// top left
+        0.0f, 1.0f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f,// bottom left
+        0.0f,  -1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f,// top left
         -0.2f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f,  1.0f, 1.0f,// top right
         -0.2f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,// bottom right
 };
@@ -38,7 +38,7 @@ unsigned int indicesZipper[] = {  // note that we start from 0!
 
 static Shader shader;  // Shader object to hold the shader program ID
 unsigned int VBOZipper, VAOZipper, EBOZipper;
-static unsigned int texture;
+static unsigned int texture, rightLineTexture, leftLineTexture;
 static int textureWidth, textureHeight;
 
 static void on_surface_created_zipper() {
@@ -93,6 +93,48 @@ static void on_surface_created_zipper() {
     } else {
         LOGE("Failed to load texture: %s");
     }
+
+    glGenTextures(1, &leftLineTexture);
+    glActiveTexture(GL_TEXTURE0);           // Choose texture unit
+    glBindTexture(GL_TEXTURE_2D, leftLineTexture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load image, create texture and generate mipmaps
+    data = loadAssetTexture("texture/zipper_left.png", &textureWidth, &textureHeight, &nrChannels);
+    if (data) {
+        // Upload the image data to OpenGL
+        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+        glTexImage2D(GL_TEXTURE_2D, 0, format, textureWidth, textureHeight, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);  // Generate mipmaps for the texture
+        freeData(data);
+    } else {
+        LOGE("Failed to load texture: %s");
+    }
+
+    glGenTextures(1, &rightLineTexture);
+    glActiveTexture(GL_TEXTURE0);           // Choose texture unit
+    glBindTexture(GL_TEXTURE_2D, rightLineTexture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load image, create texture and generate mipmaps
+    data = loadAssetTexture("texture/zipper_right.png", &textureWidth, &textureHeight, &nrChannels);
+    if (data) {
+        // Upload the image data to OpenGL
+        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+        glTexImage2D(GL_TEXTURE_2D, 0, format, textureWidth, textureHeight, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);  // Generate mipmaps for the texture
+        freeData(data);
+    } else {
+        LOGE("Failed to load texture: %s");
+    }
 }
 
 static void on_surface_changed_zipper(int screenWidth, int screenHeight) {
@@ -105,7 +147,19 @@ static void on_draw_frame_zipper() {
     // Draw the triangle
     shader_use(&shader);
     glBindVertexArray(VAOZipper);
-    glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, 0);
+
+    // Bind default texture for the main shape
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);  // Draw first part of the shape
+
+    // Now bind a different texture for the right line
+    glBindTexture(GL_TEXTURE_2D, rightLineTexture);  // Bind the texture for the right line
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)(6 * sizeof(unsigned int)));  // Draw right line section
+
+    // Bind a different texture for the left line
+    glBindTexture(GL_TEXTURE_2D, leftLineTexture);  // Bind the texture for the left line
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)(12 * sizeof(unsigned int)));  // Draw left line section
+
     glBindVertexArray(0);
 }
 
