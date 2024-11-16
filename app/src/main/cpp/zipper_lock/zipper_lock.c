@@ -44,6 +44,9 @@ unsigned int indicesZipper[] = {  // note that we start from 0!
         13, 14, 15,
 };
 
+static float timeElapsed = 0.0f;  // Track the elapsed time
+static float animationSpeed = 0.5f; // Speed of animation (you can adjust this)
+
 static Shader shader;  // Shader object to hold the shader program ID
 unsigned int VBOZipper, VAOZipper, EBOZipper;
 static unsigned int texture, rightLineTexture, leftLineTexture;
@@ -151,6 +154,32 @@ static void on_surface_changed_zipper(int screenWidth, int screenHeight) {
 
 static void on_draw_frame_zipper() {
     glClear(GL_COLOR_BUFFER_BIT);  // Clear the screen
+
+    // Increment time (for animation effect)
+    timeElapsed += animationSpeed * 0.016f; // Assume 60 FPS (time per frame is 1/60 ≈ 0.016f)
+
+// Ensure timeElapsed stays between 0 and 1
+    if (timeElapsed > 1.0f) {
+        timeElapsed -= 1.0f;
+    } else if (timeElapsed < 0.0f) { // Prevent negative timeElapsed values
+        timeElapsed += 1.0f;
+    }
+
+    // Calculate the new y value using a sine wave for smooth up and down motion
+    float newY = sin(timeElapsed * 2.0f * 3.14159265359f);  // Animate from 0.0 to 1.0
+
+    // Update the vertex positions for animation
+    verticesZipper[25] = newY;
+    verticesZipper[33] = newY;
+    verticesZipper[65] = newY;
+    verticesZipper[81] = newY;
+    verticesZipper[97] = newY;
+    verticesZipper[113] = newY;
+
+    // Update the VBO with the new vertex data
+    glBindBuffer(GL_ARRAY_BUFFER, VBOZipper);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(verticesZipper), verticesZipper);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Draw the triangle
     shader_use(&shader);
