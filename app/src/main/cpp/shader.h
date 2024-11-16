@@ -24,5 +24,6 @@ void shader_set_bool(Shader* shader, const char* name, bool value);
 void shader_set_int(Shader* shader, const char* name, int value);
 void shader_set_float(Shader* shader, const char* name, float value);
 unsigned char* loadAssetTexture(const char* filename, int* width, int* height, int* nrChannels);
+void freeData(unsigned char* data);
 
 #endif //LEARN_OPENGL_ES_WITH_C_SHADER_H

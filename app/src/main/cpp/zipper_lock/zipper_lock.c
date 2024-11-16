@@ -66,14 +66,14 @@ static void on_surface_created_zipper() {
     // load image, create texture and generate mipmaps
     int nrChannels;
     unsigned char *data = loadAssetTexture("texture/zipper_background.png", &textureWidth, &textureHeight, &nrChannels);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        LOGE("Failed to load texture");
+    if (data) {
+        // Upload the image data to OpenGL
+        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+        glTexImage2D(GL_TEXTURE_2D, 0, format, textureWidth, textureHeight, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);  // Generate mipmaps for the texture
+        freeData(data);
+    } else {
+        LOGE("Failed to load texture: %s");
     }
 }
 

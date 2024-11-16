@@ -1,12 +1,12 @@
 // Created by DatPV on 11/14/2024.
 //
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 #include "shader.h"
 #include <android/log.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <jni.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 static AAssetManager* asset_manager = NULL;
 
@@ -140,6 +140,7 @@ unsigned char* loadAssetTexture(const char* filename, int* width, int* height, i
     // Use stb_image to load image data from memory and get width, height, and channels
     stbi_set_flip_vertically_on_load(true);  // Ensure vertical flip for OpenGL compatibility
     unsigned char* imageData = stbi_load_from_memory(buffer, fileLength, width, height, nrChannels, 0);
+
     if (!imageData) {
         LOGE("Failed to load image from memory. stbi_error: %s", stbi_failure_reason());
         free(buffer);  // Free the buffer as stb_image failed to load the image
@@ -150,6 +151,10 @@ unsigned char* loadAssetTexture(const char* filename, int* width, int* height, i
     free(buffer);
 
     return imageData;
+}
+
+void freeData(unsigned char* data) {
+    stbi_image_free(data);
 }
 
 JNIEXPORT void JNICALL
