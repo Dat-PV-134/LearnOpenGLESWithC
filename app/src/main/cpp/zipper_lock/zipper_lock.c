@@ -9,8 +9,13 @@
 float verticesZipper[] = {
         1.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f,  1.0f, 1.0f,// top right
         1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,// bottom right
-        -1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f,// bottom left
-        -1.0f,  1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f,// top left
+        0.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f, 0.5f, 0.0f,// bottom left
+        0.0f,  1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.5f, 1.0f,// top left
+
+        0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f,  0.5f, 1.0f,// top right
+        0.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.5f, 0.0f,// bottom right
+        -1.0f, 1.0f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 1.0f,// bottom left
+        -1.0f,  -1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f,// top left
 
         // right line
         0.2f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f,  1.0f, 1.0f,// top right
@@ -34,6 +39,9 @@ unsigned int indicesZipper[] = {  // note that we start from 0!
 
         8, 9, 10,
         9, 10, 11,
+
+        12, 13, 14,
+        13, 14, 15,
 };
 
 static Shader shader;  // Shader object to hold the shader program ID
@@ -150,15 +158,15 @@ static void on_draw_frame_zipper() {
 
     // Bind default texture for the main shape
     glBindTexture(GL_TEXTURE_2D, texture);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);  // Draw first part of the shape
+    glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, (void*)0);  // Draw first part of the shape
 
     // Now bind a different texture for the right line
     glBindTexture(GL_TEXTURE_2D, rightLineTexture);  // Bind the texture for the right line
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)(6 * sizeof(unsigned int)));  // Draw right line section
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)(12 * sizeof(unsigned int)));  // Draw right line section
 
     // Bind a different texture for the left line
     glBindTexture(GL_TEXTURE_2D, leftLineTexture);  // Bind the texture for the left line
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)(12 * sizeof(unsigned int)));  // Draw left line section
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)(18 * sizeof(unsigned int)));  // Draw left line section
 
     glBindVertexArray(0);
 }
