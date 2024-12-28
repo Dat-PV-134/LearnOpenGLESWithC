@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Learn OpenGL ES With C"
 include(":app")
- 
+include(":nativelib")

@@ -3,4 +3,5 @@
     <string name="hello_triangle">Hello Triangle</string>
     <string name="zipper_lock">Zipper Lock</string>
     <string name="hello_texture">Hello Texture</string>
+    <string name="test">Test</string>
 </resources>
