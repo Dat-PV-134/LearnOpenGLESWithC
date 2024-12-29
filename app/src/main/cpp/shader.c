@@ -147,6 +147,15 @@ unsigned char* loadAssetTexture(const char* filename, int* width, int* height, i
         return NULL;
     }
 
+    // Check if the image has 3 or 4 channels (RGB or RGBA)
+    if (*nrChannels == 3) {
+//        LOGI("Loaded image with 3 channels (RGB)");
+    } else if (*nrChannels == 4) {
+//        LOGI("Loaded image with 4 channels (RGBA)");
+    } else {
+//        LOGI("Loaded image with %d channels", *nrChannels);
+    }
+
     // Free the buffer as stb_image has its own internal copy of the image data
     free(buffer);
 

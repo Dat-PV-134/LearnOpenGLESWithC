@@ -115,9 +115,9 @@ static void on_draw_frame() {
         timeElapsed += animationSpeed * 0.016f;
     }
 
-    if (timeElapsed > 1.5f) {
+    if (timeElapsed > 1.0f) {
         isReverse = true;
-    } else if (timeElapsed < -0.5f) {
+    } else if (timeElapsed < 0.0f) {
         isReverse = false;
     }
 
