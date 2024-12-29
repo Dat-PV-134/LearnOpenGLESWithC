@@ -11,8 +11,8 @@ uniform float progress;       // Transition progress (from 0.0 to 1.0)
 uniform int curType;
 
 // transition 1 attribute
-float amplitude = 30;
-float speed = 30;
+float amplitude = 30.0;
+float speed = 30.0;
 
 // transition 3 attribute
 const float SQRT_2 = 1.414213562373;
@@ -34,7 +34,7 @@ const vec2 center5 = vec2(0.5, 0.5);
 // transition 6
 float reflection = 0.4; // = 0.4
 float perspective = 0.4; // = 0.4
-float depth = 3; // = 3
+float depth = 3.0; // = 3
 const vec4 black = vec4(0.0, 0.0, 0.0, 1.0);
 const vec2 boundMin = vec2(0.0, 0.0);
 const vec2 boundMax = vec2(1.0, 1.0);
@@ -53,13 +53,13 @@ float PI8 = 3.14159265358979323846264;
 // transition 9 attribute
 const float MIN_AMOUNT = -0.16f;
 const float MAX_AMOUNT = 1.5f;
-float amount = progress * (MAX_AMOUNT - MIN_AMOUNT) + MIN_AMOUNT;
+float amount = 0.0f;
 const float PI = 3.141592653589793;
 const float scale = 512.0;
 const float sharpness = 3.0;
-float cylinderCenter = amount;
+float cylinderCenter = 0.0f;
 // 360 degrees * amount
-float cylinderAngle = 2.0 * PI * amount;
+float cylinderAngle = 2.0 * PI * 0.0f;
 const float cylinderRadius = 1.0 / PI / 2.0;
 
 vec4 getToColor(vec2 uv) {
@@ -404,6 +404,10 @@ vec4 transition9(vec2 p) {
 }
 
 void main() {
+    amount = progress * (MAX_AMOUNT - MIN_AMOUNT) + MIN_AMOUNT;
+    cylinderCenter = amount;
+    cylinderAngle = 2.0 * PI * amount;
+
     // Apply transition effect to the texture coordinates
     vec4 transitionColor;
     switch (curType) {
