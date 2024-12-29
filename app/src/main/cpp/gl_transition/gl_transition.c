@@ -103,7 +103,7 @@ static void on_draw_frame() {
 
     timeElapsed += animationSpeed * 0.016f;
 
-    if (timeElapsed > 1.0f) {
+    if (timeElapsed > 1.2f) {
         if (curTextureAnim < 9) {
             curTextureAnim++;
         } else {
@@ -112,7 +112,12 @@ static void on_draw_frame() {
         timeElapsed = 0.0f;
     }
 
-    shader_set_float(&shader, "progress", timeElapsed);
+    if (timeElapsed <= 1.0f) {
+        shader_set_float(&shader, "progress", timeElapsed);
+    } else {
+        shader_set_float(&shader, "progress", 1.0f);
+    }
+    shader_set_int(&shader, "curType", curTextureAnim);
 
     // Use the shader program created by shader_create
     shader_use(&shader);
