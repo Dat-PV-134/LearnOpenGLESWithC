@@ -87,7 +87,7 @@ static void gen_texture(unsigned int *texture, const char *path) {
         } else if (nrChannels == 4) {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         }
-        glGenerateMipmap(GL_TEXTURE_2D);  // Generate mipmaps after loading texture
+        glGenerateMipmap(GL_TEXTURE_2D);
     } else {
         LOGE("Failed to load texture: %s", path);
     }
@@ -98,7 +98,7 @@ static void on_surface_changed() {
 }
 
 static void on_draw_frame() {
-    glClear(GL_COLOR_BUFFER_BIT);  // Clear the screen
+    glClear(GL_COLOR_BUFFER_BIT);
 
 
     timeElapsed += animationSpeed * 0.016f;

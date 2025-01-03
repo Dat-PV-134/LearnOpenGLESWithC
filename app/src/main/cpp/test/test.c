@@ -17,11 +17,9 @@ static unsigned int indices[] = {
 };
 
 static unsigned int VBO, VAO, EBO;
-static Shader shader;  // Shader object to hold the shader program ID
-static unsigned int texture1, texture2;
+static Shader shader;
 
-static float timeElapsed = 0.0f;  // Track the elapsed time
-static float animationSpeed = 0.5f; // Speed of animation (you can adjust this)
+static float timeElapsed = 1.0f;
 
 static void on_surface_created() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -54,84 +52,21 @@ static void on_surface_created() {
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-
-    glGenTextures(1, &texture1);
-    glActiveTexture(GL_TEXTURE0);           // Choose texture unit
-    glBindTexture(GL_TEXTURE_2D, texture1); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load image, create texture and generate mipmaps
-    int width, height, nrChannels;
-    unsigned char *data = loadAssetTexture("texture/hello_texture.png", &width, &height, &nrChannels);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        LOGE("Failed to load texture");
-    }
-
-    glGenTextures(1, &texture2);
-    glActiveTexture(GL_TEXTURE0);           // Choose texture unit
-    glBindTexture(GL_TEXTURE_2D, texture2); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load image, create texture and generate mipmaps
-    int width2, height2, nrChannels2;
-    unsigned char *data2 = loadAssetTexture("texture/zipper_background.png", &width2, &height2, &nrChannels2);
-    if (data2)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width2, height2, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        LOGE("Failed to load texture");
-    }
 }
 
 static void on_surface_changed() {
 
 }
 
-static int isReverse = false;
-
 static void on_draw_frame() {
     glClear(GL_COLOR_BUFFER_BIT);  // Clear the screen
 
-    if (isReverse) {
-        timeElapsed -= animationSpeed * 0.016f;
-    } else {
-        timeElapsed += animationSpeed * 0.016f;
-    }
-
-    if (timeElapsed > 1.0f) {
-        isReverse = true;
-    } else if (timeElapsed < 0.0f) {
-        isReverse = false;
-    }
+    timeElapsed += 0.016f;
 
     shader_set_float(&shader, "progress", timeElapsed);
 
     // Use the shader program created by shader_create
     shader_use(&shader);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture1);
-    shader_set_int(&shader, "texture1", 0);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture2);
-    shader_set_int(&shader, "texture1", 1);
 
     // Bind the VAO and draw the triangle using the element indices
     glBindVertexArray(VAO);
