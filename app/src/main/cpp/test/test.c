@@ -58,12 +58,20 @@ static void on_surface_changed() {
 
 }
 
+float mouseX = 0.0f;
+float mouseY = 0.0f;
+
 static void on_draw_frame() {
     glClear(GL_COLOR_BUFFER_BIT);  // Clear the screen
 
     timeElapsed += 0.016f;
+    if (timeElapsed > 20000.0f) {
+        timeElapsed = 0.0f;
+    }
 
     shader_set_float(&shader, "progress", timeElapsed);
+    shader_set_float(&shader, "mouseX", mouseX);
+    shader_set_float(&shader, "mouseY", mouseY);
 
     // Use the shader program created by shader_create
     shader_use(&shader);
@@ -91,4 +99,14 @@ JNIEXPORT void JNICALL
 Java_com_rekoj134_learnopengleswithc_test_TestActivityRenderer_onDrawFrameNative(JNIEnv *env,
                                                                                  jobject thiz) {
     on_draw_frame();
+}
+
+
+JNIEXPORT void JNICALL
+Java_com_rekoj134_learnopengleswithc_test_TestActivityRenderer_updateMousePosition(JNIEnv *env,
+                                                                                   jobject thiz,
+                                                                                   jfloat mouse_x,
+                                                                                   jfloat mouse_y) {
+    mouseX = mouse_x;
+    mouseY = mouse_y;
 }

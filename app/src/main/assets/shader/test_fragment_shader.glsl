@@ -6,287 +6,202 @@ in vec2 TexCoord;         // Texture coordinates passed from the vertex shader
 out vec4 FragColor;       // Final output color of the fragment
 
 uniform float progress;       // Transition progress (from 0.0 to 1.0)
+uniform float mouseX;
+uniform float mouseY;
 
+#define S(a, b, t) smoothstep(a, b, t)
+#define B(a, b, blur, t) S(a-blur, a+blur, t)*S(b+blur, b-blur, t)
+#define sat(x) clamp(x, 0., 1.)
 
-float saturate(float value)
-{
-	return max(0., min(value, 1.));
+float remap01(float a, float b, float t) {
+	return sat((t-a)/(b-a));
 }
 
-vec4 eye_shape(vec2 uv, float blur, float id)
-{
-  uv.y -=0.05;
-
-  float blink = min((cos(progress * 3. + id*37.) * 0.5 + 0.5)*20., 1.);
-  //uv.y /= blink;
-  //uv.x /= min(blink + 0.5, 1.);
-  float eye = length(uv) - .1;
-  float ring = length(uv) - .07;
-  float inner = length(uv) - .04;
-  vec2 uv2 = uv;
-  uv2.x *= 0.5;
-  uv2.y = -abs(uv2.y);
-  float eye2 = length(uv2-vec2(0., -0.2*blink)) - .1;
-
-  uv2 = uv;
-  uv2.x = abs(uv2.x);
-  uv2.x *= 0.4;
-  uv2.y *= 1.5;
-  uv2.y += uv2.x*uv2.x*100.;
-  uv2.x -= (uv2.x*uv2.x)*0.01;
-  uv2.y -= 0.035;
-  float eye_white = length(uv2) - .01;
-
-  float eyeMask = smoothstep(blur, -blur, eye);
-  float eyeMask2 = smoothstep(blur, -blur, eye2);
-  float ringMask = smoothstep(blur, -blur, ring);
-  float innerMask = smoothstep(blur, -blur, inner);
-  float eye_whiteMask = smoothstep(blur, -blur, eye_white);
-  vec3 iris = vec3(221./255.,133./255.,37./255.);
-  iris += iris*0.15;
-  iris += (uv.y)/0.7*2.;
-
-  eyeMask *= 1.-eyeMask2;
-
-  vec3 color = vec3(1.);
-  color = mix(color, iris, ringMask);
-
-
-  color -= mix(color, vec3(0.), 1.-innerMask);
-  color = mix(color, vec3(1.), eye_whiteMask);
-
-  float shade = min(1. , (-eye/0.12/0.2)*0.5 + 0.6);
-  shade *= (uv.y)/0.25+ 0.9;
-  color *=vec3(1) * shade;
-
-    return vec4(color, eyeMask);
+float remap(float a, float b, float c, float d, float t) {
+	return sat((t-a)/(b-a)) * (d-c) + c;
 }
 
-vec4 body(vec2 uv, vec3 color,  float radius, float blur, float id)
-{
-
-  uv *= 1.0+(cos(progress*4. + id)*0.5+0.5)*0.02;
-
-  vec2 uvEye = uv - vec2(0., 0.24);
-  vec4 eye_color = eye_shape(uvEye, blur, id);
-
-  uv.x = abs(uv.x) * (1. + smoothstep(0.5, 0.0, uv.y)*0.2);
-
-  uv.x *= uv.x*2.0;
-  uv.x += 0.1;
-  uv.y -= 0.2;
-  uv.y *= 0.7;
-
-  float gradient_y = uv.y;
-
-  float body = length(uv) - radius;
-
-
-  float bodyMask = smoothstep(blur, -blur, body);
-
-  float bodyShape = smoothstep(-.0 , 0.4, -body/ radius);
-
-  //color *= 0.5*bodyShape;
-  vec3 finalColor = color;
-  float gradient = min(1.,(0.5 + smoothstep(-0.1, 0.2, gradient_y)));
-  finalColor = color* bodyMask;
-  finalColor *= gradient;
-  finalColor += 0.3*(1.-bodyShape)*bodyMask;
-  //color *= smoothstep(0., 0.5, 1.0 - circle);
-
-  finalColor = mix(finalColor, eye_color.rgb, eye_color.w);
-
-  return vec4(finalColor, bodyMask);
-
+vec2 within(vec2 uv, vec4 rect) {
+	return (uv-rect.xy)/(rect.zw-rect.xy);
 }
 
-vec4 starLayer2(vec2 uv)
-{
-  uv *= 10.;
-  uv *= 0.5;
+vec4 Brow(vec2 uv, float smile) {
+    float offs = mix(.2, 0., smile);
+    uv.y += offs;
 
-  vec2 lv = (fract(uv)-0.5);
-  vec2 id = ceil(uv);
+    float y = uv.y;
+    uv.y += uv.x*mix(.5, .8, smile)-mix(.1, .3, smile);
+    uv.x -= mix(.0, .1, smile);
+    uv -= .5;
 
-  float randomValue = (cos(id.y*733.23)*cos(id.x*52629.72))*0.5 + 0.5;
+    vec4 col = vec4(0.);
 
-  vec2 random = (sin(id.yx*23.89)*cos(id*3455.7))*0.5 + 0.5;
+    float blur = .1;
 
-  float sz = mix(2., 8., randomValue);
-  vec2 mv = vec2(
-    mix(-sz,sz, random.x)/4.,
-    mix(-sz,sz, random.y)/4.
-  );
-  lv *= sz;
-  lv += mv;
+   	float d1 = length(uv);
+    float s1 = S(.45, .45-blur, d1);
+    float d2 = length(uv-vec2(.1, -.2)*.7);
+    float s2 = S(.5, .5-blur, d2);
 
+    float browMask = sat(s1-s2);
 
-  float time = cos(progress*2.+ randomValue*2357.)*1.;
+    float colMask = remap01(.7, .8, y)*.75;
+    colMask *= S(.6, .9, browMask);
+    colMask *= smile;
+    vec4 browCol = mix(vec4(.4, .2, .2, 1.), vec4(1., .75, .5, 1.), colMask);
 
-  float len = abs(lv.x) * abs(lv.y);
-  float len2 = length(lv.xy);
-  vec3 col = vec3(1.);
-  len *= 40.0;
-  len = 1.-len;
-  len2 = 1.-len2;
-  col += smoothstep(0.5, 1.0, len2)*(1.-abs(cos(time*0.5)*0.5));
-  len2 = saturate(len2);
-  len*=len2;
+    uv.y += .15-offs*.5;
+    blur += mix(.0, .1, smile);
+    d1 = length(uv);
+    s1 = S(.45, .45-blur, d1);
+    d2 = length(uv-vec2(.1, -.2)*.7);
+    s2 = S(.5, .5-blur, d2);
+    float shadowMask = sat(s1-s2);
 
-  len -= (1. - abs(cos(time)*0.3));
-  len = smoothstep(-0.1, 0.1, len);
-  len = saturate(len);
+    col = mix(col, vec4(0.,0.,0.,1.), S(.0, 1., shadowMask)*.5);
 
-  vec3 star1 = vec3(1., 0.5, 0.5);
-  vec3 star2 = vec3(0.5, 0.5, 1.);
-  vec3 star = mix(star1, star2, randomValue);
+    col = mix(col, browCol, S(.2, .4, browMask));
 
-  col = star*len;
-  col += smoothstep(0.7, 1.0, len2)*1.;
-  return vec4(col, len);
-}
-vec4 stars(vec2 uv, float uvY)
-{
-  float y = uv.y;
-  vec4 s = vec4(0.);
-  uv*= 1.5;
-  vec4 sl = starLayer2(uv);
-  s = mix(s, sl, sl.w);
-
-  uv*= 1.5;
-  uv+=vec2(12.2);
-  sl = starLayer2(uv);
-  s = mix(sl, s, s.w);
-
-  //s = 1./s*0.0091;
-
-  vec3 color = vec3(0);
-  vec3 sky1 = vec3(7./255., 19./255., 44./255.);
-  vec3 sky2 = vec3(115./255., 172./255., 199./255.);
-
-  vec3 sky = mix(sky2, sky1, uvY);
-
-  //color.rg = lv;
-  color = s.rgb;
-  color = mix(sky*1.5, color, uvY - 0.3);
-
-  //color = vec3(1.) * s ;
-
-  return vec4(color, 1.);
+    return col;
 }
 
-float square(vec2 uv, float sY, float eY, float top, float bottom)
-{
-  uv.x = abs(uv.x);
+vec4 Eye(vec2 uv, float side, vec2 m, float smile) {
+    uv -= .5;
+    uv.x *= side;
 
+	float d = length(uv);
+    vec4 irisCol = vec4(.3, .5, 1., 1.);
+    vec4 col = mix(vec4(1.), irisCol, S(.1, .7, d)*.5);		// gradient in eye-white
+    col.a = S(.5, .48, d);									// eye mask
 
-  float m = 0.001;
-  float h = mix(bottom, top, (uv.y-sY)/(eY-sY));
+    col.rgb *= 1. - S(.45, .5, d)*.5*sat(-uv.y-uv.x*side); 	// eye shadow
 
+    d = length(uv-m*.4);									// offset iris pos to look at mouse cursor
+    col.rgb = mix(col.rgb, vec3(0.), S(.3, .28, d)); 		// iris outline
 
-  float k = smoothstep(-m, m, uv.y - sY);
-  k *= smoothstep(m, -m, uv.y - eY);
-  k *= smoothstep(m, -m, uv.x - h);
+    irisCol.rgb *= 1. + S(.3, .05, d);						// iris lighter in center
+    float irisMask = S(.28, .25, d);
+    col.rgb = mix(col.rgb, irisCol.rgb, irisMask);			// blend in iris
 
-  return k;
+    d = length(uv-m*.45);									// offset pupile to look at mouse cursor
 
-}
-mat2 rot(float a)
-{
-  return mat2(cos(a), - sin(a), sin(a), cos(a));
-}
+    float pupilSize = mix(.4, .16, smile);
+    float pupilMask = S(pupilSize, pupilSize*.85, d);
+    pupilMask *= irisMask;
+    col.rgb = mix(col.rgb, vec3(0.), pupilMask);		// blend in pupil
 
-float tree(vec2 uv)
-{
-  float f = square(uv, -0.1, 0.15, 0.10, 0.10);
-  //uv = rot(0.01+ cos(iGlobalTime)*0.1) * uv;
-  uv.y-= 0.16;
-  f += square(uv, -0.1, 0.35, 0.18, 0.35);
-  uv.y-= 0.35;
-  uv = rot(0.01 + cos(progress)*0.1) * uv;
-  f += square(uv, -0.05, 0.25, 0.15, 0.3);
-  uv.y-= 0.25;
-  uv = rot(0.01 + cos(progress)*0.1) * uv;
-  f += square(uv, -0.05, 0.45, 0.0, 0.25);
+    float t = progress*3.;
+    vec2 offs = vec2(sin(t+uv.y*25.), sin(t+uv.x*25.));
+    offs *= .01*(1.-smile);
 
-  return f;
-}
+    uv += offs;
+    float highlight = S(.1, .09, length(uv-vec2(-.15, .15)));
+    highlight += S(.07, .05, length(uv+vec2(-.08, .08)));
+    col.rgb = mix(col.rgb, vec3(1.), highlight);			// blend in highlight
 
-vec4 flr(vec2 uv)
-{
-  uv.y -=0.15;
-  vec3 color;
-  vec3 fg_color = vec3(32./255., 56./255., 103./255.);
-
-  float l = 1.;
-
-  uv.y += uv.x*uv.x*0.1;
-
-  l = smoothstep(0.0, 0.001, -uv.y);
-
-  color.rg = uv;
-  color = fg_color;
-
-  vec2 lv = rot(-0.12 + cos(progress*2.)*0.01 ) * (uv + vec2(-0.55, 0.));
-  lv.y +=0.2;
-  lv*=1.7;
-  l += tree(lv);
-
-  lv = rot(0.12 + cos(progress*2. + 23.)*0.1 ) * (uv + vec2(0.55, 0.));
-  lv*=1.8;
-  l += tree(lv);
-
-  l = saturate(l);
-
-  color *= 1. - uv.y*0.9;
-
-  return vec4(color, l);
+    return col;
 }
 
-float circle(vec2 uv, float radius, float blur)
-{
-  float circle = length(uv) - radius;
-  circle = smoothstep(blur, -blur, circle);
-  return circle;
+vec4 Mouth(vec2 uv, float smile) {
+    uv -= .5;
+	vec4 col = vec4(.5, .18, .05, 1.);
+
+    uv.y *= 1.5;
+    uv.y -= uv.x*uv.x*2.*smile;
+
+    uv.x *= mix(2.5, 1., smile);
+
+    float d = length(uv);
+    col.a = S(.5, .48, d);
+
+    vec2 tUv = uv;
+    tUv.y += (abs(uv.x)*.5+.1)*(1.-smile);
+    float td = length(tUv-vec2(0., .6));
+
+    vec3 toothCol = vec3(1.)*S(.6, .35, d);
+    col.rgb = mix(col.rgb, toothCol, S(.4, .37, td));
+
+    td = length(uv+vec2(0., .5));
+    col.rgb = mix(col.rgb, vec3(1., .5, .5), S(.5, .2, td));
+    return col;
+}
+
+vec4 Head(vec2 uv) {
+	vec4 col = vec4(.9, .65, .1, 1.);
+
+    float d = length(uv);
+
+    col.a = S(.5, .49, d);
+
+    float edgeShade = remap01(.35, .5, d);
+    edgeShade *= edgeShade;
+    col.rgb *= 1.-edgeShade*.5;
+
+    col.rgb = mix(col.rgb, vec3(.6, .3, .1), S(.47, .48, d));
+
+    float highlight = S(.41, .405, d);
+    highlight *= remap(.41, -.1, .75, 0., uv.y);
+    highlight *= S(.18, .19, length(uv-vec2(.21, .08)));
+    col.rgb = mix(col.rgb, vec3(1.), highlight);
+
+    d = length(uv-vec2(.25, -.2));
+    float cheek = S(.2,.01, d)*.4;
+    cheek *= S(.17, .16, d);
+    col.rgb = mix(col.rgb, vec3(1., .1, .1), cheek);
+
+    return col;
+}
+
+vec4 Smiley(vec2 uv, vec2 m, float smile) {
+	vec4 col = vec4(0.);
+
+    if(length(uv)<.5) {					// only bother about pixels that are actually inside the head
+        float side = sign(uv.x);
+        uv.x = abs(uv.x);
+        vec4 head = Head(uv);
+        col = mix(col, head, head.a);
+
+        if(length(uv-vec2(.2, .075))<.175) {
+            vec4 eye = Eye(within(uv, vec4(.03, -.1, .37, .25)), side, m, smile);
+            col = mix(col, eye, eye.a);
+        }
+
+        if(length(uv-vec2(.0, -.15))<.3) {
+            vec4 mouth = Mouth(within(uv, vec4(-.3, -.43, .3, -.13)), smile);
+            col = mix(col, mouth, mouth.a);
+        }
+
+        if(length(uv-vec2(.185, .325))<.18) {
+            vec4 brow = Brow(within(uv, vec4(.03, .2, .4, .45)), smile);
+            col = mix(col, brow, brow.a);
+        }
+    }
+
+    return col;
 }
 
 void main() {
-          float time = progress * 1.0;
-           vec2 uv = TexCoord;
-           vec2 normalizedUV = TexCoord;
+     float t = progress;
 
-           uv.x -= 0.5;
-           //uv.y -= (TexCoord.y/TexCoord.x)*0.5;
-           //uv.y
-           uv.y += 0.05;
+         vec2 uv = TexCoord;
+         uv -= .5;
+         uv *= 3.0;
+         uv.x *= 720.0/1440.0;
 
+         vec2 m = vec2(mouseX / 3.0, mouseY / 3.0);
 
-           vec4 col = vec4(0);
+         if(m.x<-.49 && m.y<-.49) {
+         	float s = sin(t*.5);
+             float c = cos(t*.38);
 
-           float blur = 0.001;
-           vec3 c1 = vec3(155./255.,197./255.,52./255.);
-           vec3 c2 = vec3(201./255.,45./255.,75./255.);
-           vec3 c3 = vec3(81./255.,169./255.,221./255.);
+             m = vec2(s, c)*.4;
+         }
 
-           col.rg = uv;
+         if(length(m) > .707) m *= 0.;
 
-           uv *= 1.4;
+         float d = dot(uv, uv);
+         uv -= m*sat(.23-d);
 
-           vec4 b1 = body(uv, c1, 0.2, blur, 1.);
-           vec2 uv2 = rot(0.4) * (uv + vec2(0.2, 0.));
-           vec4 b2 = body(uv2, c2, 0.2, blur,2.);
-           uv2 = rot(-0.4) * (uv + vec2(-0.2, 0.));
-           vec4 b3 = body(uv2, c3, 0.2, blur,3.);
-
-           col = stars(uv, normalizedUV.y);
-           col = mix(col, b2, b2.w);
-           col = mix(col, b3, b3.w);
-           col = mix(col, b1, b1.w);
-
-           vec4 flr = flr(uv);
-           col = mix(col, flr, flr.w);
-           //col = b1+b2;
-           //col += body(uv, c1, 0.2, blur);
-
-           FragColor = vec4(col.rgb, 1.);
+         float smile = sin(t*.5)*.5+.5;
+     	FragColor = Smiley(uv, m, smile);
 }

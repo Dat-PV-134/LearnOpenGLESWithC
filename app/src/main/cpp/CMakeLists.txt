@@ -45,11 +45,15 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         zipper_lock/zipper_lock.h
         zipper_lock/zipper_lock.c
 
-        #test
+        # transformation
+        transformations/transformations.h
+        transformations/transformations.c
+
+        # transition
         gl_transition/gl_transition.h
         gl_transition/gl_transition.c
 
-        #test
+        # test
         test/test.h
         test/test.c)
 

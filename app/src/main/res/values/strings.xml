@@ -5,4 +5,6 @@
     <string name="hello_texture">Hello Texture</string>
     <string name="test">Test</string>
     <string name="transition">Transition</string>
+    <string name="transformations">Transformations</string>
+    <string name="live_wallpaper">Live Wallpaper</string>
 </resources>

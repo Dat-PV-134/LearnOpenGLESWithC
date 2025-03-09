@@ -1,5 +1,6 @@
 package com.rekoj134.learnopengleswithc.test
 
+import android.graphics.Canvas
 import android.opengl.GLSurfaceView.Renderer
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -17,7 +18,16 @@ class TestActivityRenderer : Renderer {
         onDrawFrameNative()
     }
 
+    fun handleTouchPress(normalizeX: Float, normalizeY: Float) {
+        updateMousePosition(normalizeX, normalizeY)
+    }
+
+    fun handleTouchDrag(normalizeX: Float, normalizeY: Float) {
+        updateMousePosition(normalizeX, normalizeY)
+    }
+
     private external fun onSurfaceCreatedNative()
     private external fun onSurfaceChangedNative()
     private external fun onDrawFrameNative()
+    private external fun updateMousePosition(mouseX: Float, mouseY: Float)
 }
